@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="dao.developer.AppInfo.AppInfoMapper">
+ 	<!-- 分页查询 -->
+ 	<select id="getAppInfoList" resultMap="AppInfos" parameterType="Map">
+ 		SELECT  i.*,v.versionNo,
+		(SELECT valueName FROM data_dictionary WHERE typeCode='APP_STATUS' AND valueId=i.status) AS statusName
+		,(SELECT valueName FROM data_dictionary WHERE typeCode='APP_FLATFORM' AND valueId=i.flatformId) AS flatformName
+		,(SELECT categoryName FROM app_category WHERE id=i.categoryLevel1) AS categoryLevel1Name
+		,(SELECT categoryName FROM app_category WHERE id=i.categoryLevel2) AS categoryLeve21Name
+		,(SELECT categoryName FROM app_category WHERE id=i.categoryLevel3) AS categoryLeve31Name
+		FROM app_info i LEFT JOIN app_version v ON i.id=v.appId
+		where 1=1
+		<if test="softwareName!=null and softwareName!=''">
+			and i.softwareName like concat('%',#{softwareName},'%')
+		</if>
+		<if test="status!=null and status!=0">
+			and i.status=#{status}
+		</if>
+		<if test="flatformId!=null and flatformId!=0">
+			 and  i.flatformId=#{flatformId}
+		</if>
+		<if test="categoryLevel1!=null and categoryLevel1!=0">
+			 and  i.categoryLevel1=#{categoryLevel1}
+		</if>
+		<if test="categoryLevel2!=null and categoryLevel2!=0">
+			 and  i.categoryLevel2=#{categoryLevel2}
+		</if>
+		<if test="categoryLevel3!=null and categoryLevel3!=0">
+			 and  i.categoryLevel3=#{categoryLevel3}
+		</if>
+		GROUP BY i.id
+		ORDER BY i.id DESC 
+		LIMIT #{cur},#{curSize}
+ 	</select>
+ 	<resultMap type="AppInfo" id="AppInfos">
+ 		
+ 		<result property="versionNo" column="versionNo"/>
+ 		<result property="downloads" column="downloads"/>
+ 		<result property="statusName" column="statusName"/>
+ 		<result property="flatformName" column="flatformName"/>
+ 		<result property="categoryLevel1Name" column="categoryLevel1Name"/>
+ 		<result property="categoryLeve21Name" column="categoryLeve21Name"/>
+ 		<result property="categoryLeve31Name" column="categoryLeve31Name"/>
+ 	</resultMap>
+ 	<!-- 查询总数量 -->
+ 	<select id="getAppInfoCount" resultType="int">
+ 		select count(1) from app_info
+ 		where 1=1
+ 		<if test="softwareName!=null and softwareName!=''">
+			and softwareName like concat('%',#{softwareName},'%')
+		</if>
+		<if test="status!=null and status!=0">
+			and status=#{status}
+		</if>
+		<if test="flatformId!=null and flatformId!=0">
+			 and  flatformId=#{flatformId}
+		</if>
+		<if test="categoryLevel1!=null and categoryLevel1!=0">
+			 and  categoryLevel1=#{categoryLevel1}
+		</if>
+		<if test="categoryLevel2!=null and categoryLevel2!=0">
+			 and  categoryLevel2=#{categoryLevel2}
+		</if>
+		<if test="categoryLevel3!=null and categoryLevel3!=0">
+			 and  categoryLevel3=#{categoryLevel3}
+		</if>
+ 	</select>
+ 	<!-- 添加数据 -->
+ 	<insert id="addApp" parameterType="AppInfo">
+ 		INSERT INTO 
+		app_info(softwareName,APKName,supportROM,interfaceLanguage,devId,
+		softwareSize,downloads,flatformId,categoryLevel1,categoryLevel2,
+		categoryLevel3,status,appInfo,logoPicPath,logoLocPath,createdBy,creationDate)
+		VALUES(#{softwareName},#{APKName},#{supportROM},#{interfaceLanguage},#{devId},#{softwareSize},#{downloads},#{flatformId},#{categoryLevel1},#{categoryLevel2},
+		#{categoryLevel3},#{status},#{appInfo},#{logoPicPath},#{logoLocPath},#{createdBy},#{creationDate})
+ 	</insert>
+ 	<!--根据id查询数据  -->
+ 	<select id="getAppInfoById" resultMap="AppInfos">
+ 		SELECT  i.*,v.versionNo,
+		(SELECT valueName FROM data_dictionary WHERE typeCode='APP_STATUS' AND valueId=i.status) AS statusName
+		,(SELECT valueName FROM data_dictionary WHERE typeCode='APP_FLATFORM' AND valueId=i.flatformId) AS flatformName
+		,(SELECT categoryName FROM app_category WHERE id=i.categoryLevel1) AS categoryLevel1Name
+		,(SELECT categoryName FROM app_category WHERE id=i.categoryLevel2) AS categoryLeve21Name
+		,(SELECT categoryName FROM app_category WHERE id=i.categoryLevel3) AS categoryLeve31Name
+		FROM app_info i LEFT JOIN app_version v ON i.id=v.appId
+		where i.id=#{id}
+		GROUP BY i.id
+ 	</select>
+ 	<!-- 修改数据 -->
+ 	<update id="modifyAppInfo" parameterType="AppInfo">
+ 		UPDATE app_info
+		<set>
+			<if test="softwareName!=null and softwareName!=''">
+				softwareName=#{softwareName},
+			</if>
+			<if test="supportROM!=null and supportROM!=''">
+				supportROM=#{supportROM},
+			</if>
+			<if test="interfaceLanguage!=null and interfaceLanguage!=''">
+				interfaceLanguage=#{interfaceLanguage},
+			</if>
+			<if test="softwareSize!=null and softwareSize!=0">
+				softwareSize=#{softwareSize},
+			</if>
+			<if test="updateDate!=null">
+				updateDate=#{updateDate},
+			</if>
+			<if test="appInfo!=null">
+				appInfo=#{appInfo},
+			</if>
+			<if test="flatformId!=null and flatformId!=0">
+				flatformId=#{flatformId},
+			</if>
+			<if test="downloads!=null and downloads!=0">
+				downloads=#{downloads},
+			</if>
+			<if test="categoryLevel3!=null and categoryLevel3!=0">
+				categoryLevel3=#{categoryLevel3},
+			</if>
+			<if test="categoryLevel1!=null and categoryLevel1!=0">
+				categoryLevel1=#{categoryLevel1},
+			</if>
+			<if test="categoryLevel2!=null and categoryLevel2!=0">
+				categoryLevel2=#{categoryLevel2},
+			</if>
+			<if test="modifyBy!=null and modifyBy!=0">
+				modifyBy=#{modifyBy},
+			</if>
+			<if test='modifyDate!=null'>
+				modifyDate=#{modifyDate},
+			</if>
+			<if test="logoPicPath!=''">
+				logoPicPath=#{logoPicPath},
+				logoLocPath=#{logoLocPath},
+			</if>
+		</set>
+		WHERE id=#{id}
+ 	</update>
+ 	<!-- 根据id修改版本 -->
+ 	<update id="modifyVersionId">
+ 		UPDATE app_info
+		SET versionId=#{versionId}
+		WHERE id=#{id}
+ 	</update>
+ 	<!-- 根据id删除数据 -->
+ 	<delete id="delApp">
+ 		DELETE from  app_info WHERE id =#{id}
+ 	</delete>
+ 	<!--根据akpName查询是否有1数据-->
+ 	<select id="getAppInfoByapkName" resultType="AppInfo">
+ 		select  * from app_info where APKName=#{APKName}
+ 	</select>
+ 	<!-- 修改状态 -->
+ 	<update id="modifystatus">
+ 		update app_info 
+ 		set status=#{status}
+ 		where id=#{id}
+ 	</update>
+ </mapper>

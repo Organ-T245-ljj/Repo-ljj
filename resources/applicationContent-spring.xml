@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-3.2.xsd 
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context-3.2.xsd 
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx-3.2.xsd 
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop-3.2.xsd"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns="http://www.springframework.org/schema/beans">
+	<!-- 引入properteis文件 -->
+		<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+			<property name="location" value="classpath:database.properties"></property>
+		</bean>	
+	<!-- 配置DataSource -->
+		<bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+			<property name="driverClassName" value="${driver}"></property>
+			<property name="url" value="${url}"></property>
+			<property name="username" value="${user}"></property>
+			<property name="password" value="${pwd}"></property>
+		</bean>
+	<!-- 配置事务声明 -->
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>	
+	<tx:annotation-driven transaction-manager="txManager"/>
+	<!-- 获取会话工厂，并注入Mybatis，和dateSource数据库链接 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 引用数据源组件 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 引入Mybatis配置文件的配置 -->
+		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
+		<!-- 配置sql映射文件信息 -->
+		<!-- 因为使用了映射注入所以这里不用在配置了 -->
+	</bean>
+	<!-- 配置注入映射 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="dao"></property>
+	</bean>
+	
+	<!-- 扫描包中注解 -->
+	<context:component-scan base-package="dao,service"></context:component-scan>
+	<!-- 支持注解 -->
+	<aop:aspectj-autoproxy />
+</beans>
